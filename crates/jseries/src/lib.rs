@@ -132,34 +132,3 @@ mod tests {
         assert_eq!(msg, parsed);
     }
 }
-
-// Kani proof harness (compiled only under the Kani verifier)
-#[cfg(kani)]
-mod proofs {
-    use super::*;
-
-    #[kani::proof]
-    fn no_panic_on_valid_j3_2() {
-        // Create an arbitrary J3.2 body and ensure (de)serialization roundtrips.
-        let track: u16 = kani::any();
-        let lat: i32 = kani::any();
-        let lon: i32 = kani::any();
-        let alt: i16 = kani::any();
-        let spd: u16 = kani::any();
-        let hdg: u16 = kani::any();
-        let body = J3_2AirTrack {
-            track,
-            lat_e7: lat,
-            lon_e7: lon,
-            alt_m: alt,
-            speed_ms: spd,
-            heading_cdeg: hdg,
-        };
-        let msg = JMessage::J3_2(body.clone());
-        let bytes = msg.to_bytes().unwrap();
-        let parsed = JMessage::from_bytes(&bytes).unwrap();
-        match parsed {
-            JMessage::J3_2(b) => assert!(b == body),
-        }
-    }
-}

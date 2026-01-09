@@ -2,7 +2,7 @@
 
 This workspace bootstraps the Phase 1–3 goals:
 
-- Phase 1: Core J-Series parsing (crates/jseries), Zenoh bridge (apps/bridge), Kani proof harness scaffolding.
+- Phase 1: Core J-Series parsing (crates/jseries) and Zenoh bridge (apps/bridge).
 - Phase 2: Application-level E2EE (crates/e2ee) with hooks for rustls and optional PQC.
 - Phase 3: Containerization and SBOM.
 
@@ -38,15 +38,6 @@ Generate SBOM (CycloneDX) locally (requires cargo-sbom):
 cargo install cargo-sbom
 # cargo-sbom outputs to stdout; choose CycloneDX JSON 1.4 and redirect to a file
 cargo sbom --output-format cyclone_dx_json_1_4 > sbom.json
-```
-
-Kani proofs (locally):
-
-```bash
-# Install Kani per upstream instructions, then
-cargo kani -p jseries
-# Or, to run across the workspace if you add more proofs later:
-# cargo kani --workspace
 ```
 
 ## Docker

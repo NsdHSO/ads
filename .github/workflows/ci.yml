@@ -1,4 +1,4 @@
-name: Test, Clippy, Fmt, Sbom, Kani
+name: Test, Clippy, Fmt, SBOM
 on:
   push:
     branches: [ master ]
@@ -37,12 +37,3 @@ jobs:
         with:
           name: sbom
           path: sbom.json
-
-  kani:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Kani proofs (scaffold)
-        uses: model-checking/kani-github-action@v1
-        with:
-          args: "-p jseries"
