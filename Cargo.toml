@@ -1,6 +1,37 @@
-[package]
-name = "ads"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+members = [
+    "crates/jseries",
+    "crates/e2ee",
+    "apps/bridge",
+]
+resolver = "2"
 
-[dependencies]
+[workspace.package]
+authors = ["nechifrelsamuel@gmail.com"]
+edition = "2021"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# Parsing & serialization for bit-level packed formats
+deku = { version = "0.20.2", default-features = false }
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+# Async/runtime
+tokio = { version = "1.36", features = ["rt-multi-thread","macros","net","time"] }
+# Messaging backbone
+zenoh = { version = "1.7.2" }
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Crypto primitives
+aes-gcm = { version = "0.10", features = ["aes"] }
+rand_core = "0.9.3"
+blake3 = "1.5"
+# TLS (for future E2EE key schedule)
+rustls = { version = "0.23" }
+# Utilities
+hex = "0.4"
+# Testing
+proptest = { version = "1.4" }
+anyhow = "1.0"
+thiserror = "2.0.17"
