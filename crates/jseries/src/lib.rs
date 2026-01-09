@@ -38,7 +38,7 @@ pub enum JMessage {
 
 impl JMessage {
     pub fn from_bytes(input: &[u8]) -> Result<Self, Error> {
-        if input.len() < 1 {
+        if input.is_empty() {
             return Err(Error::Short(input.len()));
         }
         let kind = input[0];
