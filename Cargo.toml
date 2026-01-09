@@ -11,6 +11,7 @@ authors = ["nechifrelsamuel@gmail.com"]
 edition = "2021"
 license = "Apache-2.0"
 
+
 [workspace.dependencies]
 # Parsing & serialization for bit-level packed formats
 deku = { version = "0.20.2", default-features = false }

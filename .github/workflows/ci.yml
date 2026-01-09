@@ -1,39 +1,37 @@
-name: Test, Clippy, Fmt, SBOM
+name: CI
 on:
   push:
     branches: [ master ]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  rust:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build --workspace --all-targets
-      - name: Test
-        run: cargo test --workspace --all-features
-      - name: Clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
-      - name: Fmt
-        run: cargo fmt --all -- --check
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      toolchain: stable
+
+  test:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      toolchain: stable
+
+  clippy:
+    needs: build
+    uses: ./.github/workflows/lint.yml
+    with:
+      toolchain: stable
+
+  fmt:
+    needs: build
+    uses: ./.github/workflows/fmt.yml
+    with:
+      toolchain: stable
 
   sbom:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Install cargo-sbom
-        run: cargo install cargo-sbom
-      - name: Generate SBOM (CycloneDX)
-        run: cargo sbom --output-format cyclone_dx_json_1_4 > sbom.json
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.json
+    needs: [build]
+    uses: ./.github/workflows/sbom.yml

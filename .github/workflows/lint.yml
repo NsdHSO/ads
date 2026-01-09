@@ -1,0 +1,18 @@
+name: Clippy
+on:
+  workflow_call:
+    inputs:
+      toolchain:
+        type: string
+        default: stable
+jobs:
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@${{ inputs.toolchain }}
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings

@@ -1,0 +1,16 @@
+name: Build
+on:
+  workflow_call:
+    inputs:
+      toolchain:
+        type: string
+        default: stable
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@${{ inputs.toolchain }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --workspace --all-targets

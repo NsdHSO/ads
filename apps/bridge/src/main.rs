@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 use std::net::SocketAddr;
+use jseries::{JMessage, J3_2AirTrack};
 
 #[derive(Debug, Parser)]
 #[command(name = "bridge", about = "ADS Secure Translator bridge (prototype)")]

@@ -1,0 +1,18 @@
+name: SBOM
+on:
+  workflow_call: {}
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-sbom
+        run: cargo install cargo-sbom
+      - name: Generate SBOM (CycloneDX)
+        run: cargo sbom --output-format cyclone_dx_json_1_4 > sbom.json
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
