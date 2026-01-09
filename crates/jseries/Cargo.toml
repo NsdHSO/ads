@@ -11,3 +11,7 @@ deku = { workspace = true, features = ["alloc"] }
 proptest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+
+[lints.rust]
+# Allow cfg(kani) so normal builds don’t warn about the proof harness
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }

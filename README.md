@@ -43,7 +43,9 @@ Kani proofs (locally):
 
 ```bash
 # Install Kani per upstream instructions, then
-kani --enable-unstable --workspace
+cargo kani -p jseries
+# Or, to run across the workspace if you add more proofs later:
+# cargo kani --workspace
 ```
 
 ## Docker

@@ -45,4 +45,4 @@ jobs:
       - name: Run Kani proofs (scaffold)
         uses: model-checking/kani-github-action@v1
         with:
-          args: "--enable-unstable --workspace"
+          args: "-p jseries"
