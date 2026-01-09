@@ -10,28 +10,28 @@ concurrency:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
+    uses: ./build.yml
     with:
       toolchain: stable
 
   test:
     needs: build
-    uses: ./.github/workflows/test.yml
+    uses: ./test.yml
     with:
       toolchain: stable
 
   clippy:
     needs: build
-    uses: ./.github/workflows/lint.yml
+    uses: ./lint.yml
     with:
       toolchain: stable
 
   fmt:
     needs: build
-    uses: ./.github/workflows/fmt.yml
+    uses: ./fmt.yml
     with:
       toolchain: stable
 
   sbom:
     needs: [build]
-    uses: ./.github/workflows/sbom.yml
+    uses: ./sbom.yml
