@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::Parser;
-use jseries::{J3_2AirTrack, JMessage};
 use std::net::SocketAddr;
 
 #[derive(Debug, Parser)]
@@ -34,7 +33,7 @@ async fn main() -> Result<()> {
     let sess = args.psk_hex.as_deref().map(hex_to_session);
     let sock = tokio::net::UdpSocket::bind("0.0.0.0:0").await?;
 
-#[cfg(feature = "zenoh")]
+    #[cfg(feature = "zenoh")]
     {
         // Zenoh 1.x API: open() and declare_subscriber() are async and return Results directly.
         let config = zenoh::config::Config::default();
@@ -45,7 +44,10 @@ async fn main() -> Result<()> {
             .declare_subscriber(args.subscribe.clone())
             .await
             .map_err(|e| anyhow::anyhow!("{}", e))?;
-        println!("bridge: listening on Zenoh selector '{}' -> UDP {}", args.subscribe, args.sink);
+        println!(
+            "bridge: listening on Zenoh selector '{}' -> UDP {}",
+            args.subscribe, args.sink
+        );
         loop {
             let sample = sub
                 .recv_async()
@@ -54,7 +56,14 @@ async fn main() -> Result<()> {
             // Extract payload text from ZBytes
             if let Ok(text) = sample.payload().try_to_string() {
                 if let Ok(t) = serde_json::from_str::<Telemetry>(&text) {
-                    let j = JMessage::J3_2(J3_2AirTrack::from_geo(t.track, t.lat, t.lon, t.alt_m, t.speed_ms, t.heading_deg));
+                    let j = JMessage::J3_2(J3_2AirTrack::from_geo(
+                        t.track,
+                        t.lat,
+                        t.lon,
+                        t.alt_m,
+                        t.speed_ms,
+                        t.heading_deg,
+                    ));
                     let mut bytes = j.to_bytes()?;
                     if let Some(s) = &sess {
                         bytes = s.seal(b"j3.2", &bytes)?;

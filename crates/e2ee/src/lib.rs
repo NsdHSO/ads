@@ -2,14 +2,19 @@
 //! - Symmetric encryption via AES-GCM.
 //! - Hook points for rustls-based session key derivation (feature = "rustls").
 
-use aes_gcm::{aead::{Aead, KeyInit, OsRng}, Aes256Gcm, Nonce};
 use aes_gcm::aead::rand_core::RngCore;
+use aes_gcm::{
+    aead::{Aead, KeyInit, OsRng},
+    Aes256Gcm, Nonce,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("encryption failed")] Encrypt,
-    #[error("decryption failed")] Decrypt,
+    #[error("encryption failed")]
+    Encrypt,
+    #[error("decryption failed")]
+    Decrypt,
 }
 
 /// Opaque session for encrypt/decrypt of payloads.
@@ -33,7 +38,13 @@ impl Session {
         let mut out = Vec::with_capacity(12 + plaintext.len() + 16);
         out.extend_from_slice(&nonce_bytes);
         let ct = cipher
-            .encrypt(nonce, aes_gcm::aead::Payload { msg: plaintext, aad })
+            .encrypt(
+                nonce,
+                aes_gcm::aead::Payload {
+                    msg: plaintext,
+                    aad,
+                },
+            )
             .map_err(|_| Error::Encrypt)?;
         out.extend_from_slice(&ct);
         Ok(out)
@@ -41,7 +52,9 @@ impl Session {
 
     /// Decrypt a payload produced by `seal`.
     pub fn open(&self, aad: &[u8], framed: &[u8]) -> Result<Vec<u8>, Error> {
-        if framed.len() < 12 { return Err(Error::Decrypt); }
+        if framed.len() < 12 {
+            return Err(Error::Decrypt);
+        }
         let (nonce_bytes, ct) = framed.split_at(12);
         let cipher = Aes256Gcm::new(&self.key);
         let nonce = Nonce::from_slice(nonce_bytes);
@@ -71,7 +84,8 @@ pub mod tls {
         let mut out = [0u8; 32];
         let label = b"ads-e2ee-2026";
         let context: &[u8] = &[];
-        conn.export_keying_material(&mut out, label, Some(context)).ok()?;
+        conn.export_keying_material(&mut out, label, Some(context))
+            .ok()?;
         Some(Session::from_key(out))
     }
 }
