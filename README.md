@@ -36,7 +36,8 @@ Generate SBOM (CycloneDX) locally (requires cargo-sbom):
 
 ```bash
 cargo install cargo-sbom
-cargo sbom --format cyclonedx --output sbom.json
+# cargo-sbom outputs to stdout; choose CycloneDX JSON 1.4 and redirect to a file
+cargo sbom --output-format cyclone_dx_json_1_4 > sbom.json
 ```
 
 Kani proofs (locally):

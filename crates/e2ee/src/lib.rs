@@ -64,9 +64,9 @@ pub mod tls {
     //! Hook points to derive an application-level session key via a rustls TLS 1.3 handshake.
     //! Integrate by exporting keying material (EKM) after handshake and feeding it to `Session::from_key`.
     use super::Session;
-    use rustls::{Connection, KeyLogFile};
+    use rustls::Connection;
 
-    pub fn session_from_ekm<C: Connection>(conn: &mut C) -> Option<Session> {
+    pub fn session_from_ekm(conn: &Connection) -> Option<Session> {
         // Export 32 bytes of keying material following RFC 5705-like interface (rustls API provides EKM).
         let mut out = [0u8; 32];
         let label = b"ads-e2ee-2026";
