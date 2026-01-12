@@ -3,9 +3,12 @@
 
 use core::fmt;
 use deku::prelude::*;
+use std::fmt::Formatter;
 
 pub const MSG_ID_J3_2: u8 = 0x32; // Prototype identifier for J3.2 Air Track
-
+const LAT_SCALE: f64 = 524287.0 / 180.0; // 19-bit mapping for -90 to +90
+const LON_SCALE: f64 = 524287.0 / 360.0; // 19-bit mapping for -180 to +180
+const ALT_STEP: f64 = 25.0; // Standard 25ft altitude increments
 #[derive(Debug, Clone)]
 pub enum Error {
     Unsupported(u8),
@@ -20,7 +23,7 @@ impl From<deku::error::DekuError> for Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Error::Unsupported(k) => write!(f, "unsupported message kind: {k:02x}"),
             Error::Short(n) => write!(f, "buffer too short: {n} bytes"),
@@ -34,6 +37,17 @@ impl std::error::Error for Error {}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum JMessage {
     J3_2(J3_2AirTrack),
+}
+
+impl fmt::Display for JMessage {
+    fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        match self {
+            JMessage::J3_2(e) => {
+                println!("{} , {    }", e.altitude, e.track);
+                Ok(())
+            }
+        }
+    }
 }
 
 impl JMessage {
@@ -74,14 +88,17 @@ pub struct J3_2AirTrack {
     #[deku(bytes = 2)]
     pub track: u16,
     /// latitude scaled by 1e7 (degrees * 1e7)
-    #[deku(bytes = 4)]
-    pub lat_e7: i32,
-    /// longitude scaled by 1e7 (degrees * 1e7)
-    #[deku(bytes = 4)]
-    pub lon_e7: i32,
-    /// altitude in meters
-    #[deku(bytes = 2)]
-    pub alt_m: i16,
+    #[deku(bits = 19)]
+    pub latitude: u32, // Military scaled coordinate
+    #[deku(bits = 19)]
+    pub longitude: u32, // Military scaled coordinate
+    #[deku(bits = 12)]
+    pub track_number: u16, // Unique track ID
+    #[deku(bits = 14)]
+    pub altitude: u16, // Scaled altitude
+    // The final 5 bits are for parity (calculated at runtime)
+    #[deku(bits = 5)]
+    pub parity: u8,
     /// speed in m/s
     #[deku(bytes = 2)]
     pub speed_ms: u16,
@@ -95,20 +112,21 @@ impl J3_2AirTrack {
         track: u16,
         lat_deg: f64,
         lon_deg: f64,
-        alt_m: i16,
+        alt_meters: f64,
         speed_ms: u16,
-        heading_deg: f32,
+        heading_deg: u16,
     ) -> Self {
-        let lat_e7 = (lat_deg * 10_000_000.0).round() as i32;
-        let lon_e7 = (lon_deg * 10_000_000.0).round() as i32;
-        let heading_cdeg = ((heading_deg.rem_euclid(360.0)) * 100.0).round() as u16;
+        let alt_ft = alt_meters * 3.28084;
+
         Self {
             track,
-            lat_e7,
-            lon_e7,
-            alt_m,
+            track_number: track & 0x0FFF,
+            latitude: ((lat_deg + 90.0) * LAT_SCALE).round() as u32,
+            longitude: ((lon_deg + 180.0) * LON_SCALE).round() as u32,
+            altitude: (alt_ft / ALT_STEP).round() as u16,
+            parity: 0,
             speed_ms,
-            heading_cdeg,
+            heading_cdeg: heading_deg,
         }
     }
 }
@@ -123,9 +141,9 @@ mod tests {
             42,
             45.1234567,
             -122.9876543,
-            1500,
+            1500.0,
             220,
-            271.5,
+            271,
         ));
         let bytes = msg.to_bytes().unwrap();
         let parsed = JMessage::from_bytes(&bytes).unwrap();

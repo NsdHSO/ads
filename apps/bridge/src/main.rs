@@ -22,9 +22,9 @@ struct Telemetry {
     track: u16,
     lat: f64,
     lon: f64,
-    alt_m: i16,
+    alt_m: f64,
     speed_ms: u16,
-    heading_deg: f32,
+    heading_deg: u16,
 }
 
 #[tokio::main]
