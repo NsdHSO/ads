@@ -3,7 +3,6 @@ members = [
     "crates/jseries",
     "crates/e2ee",
     "apps/bridge",
-    "apps/publisher",
 ]
 resolver = "2"
 

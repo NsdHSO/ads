@@ -49,7 +49,6 @@ async fn main() -> Result<()> {
             "bridge: listening on Zenoh selector '{}' -> UDP {}",
             args.subscribe, args.sink
         );
-
         loop {
             let sample = sub
                 .recv_async()
