@@ -55,22 +55,26 @@ async fn main() -> Result<()> {
                 .await
                 .map_err(|e| anyhow::anyhow!("{}", e))?;
             // Extract payload text from ZBytes
-            if let Ok(text) = sample.payload().try_to_string() {
-                if let Ok(t) = serde_json::from_str::<Telemetry>(&text) {
-                    let j = JMessage::J3_2(J3_2AirTrack::from_geo(
-                        t.track,
-                        t.lat,
-                        t.lon,
-                        t.alt_m,
-                        t.speed_ms,
-                        t.heading_deg,
-                    ));
-                    let mut bytes = j.to_bytes()?;
-                    if let Some(s) = &sess {
-                        bytes = s.seal(b"j3.2", &bytes)?;
+            match sample.payload().try_to_string() {
+                Ok(text) => match serde_json::from_str::<Telemetry>(&text) {
+                    Ok(t) => {
+                        let j = JMessage::J3_2(J3_2AirTrack::from_geo(
+                            t.track,
+                            t.lat,
+                            t.lon,
+                            t.alt_m,
+                            t.speed_ms,
+                            t.heading_deg,
+                        ));
+                        let mut bytes = j.to_bytes()?;
+                        if let Some(s) = &sess {
+                            bytes = s.seal(b"j3.2", &bytes)?;
+                        }
+                        sock.send_to(&bytes, args.sink).await?;
                     }
-                    sock.send_to(&bytes, args.sink).await?;
-                }
+                    Err(e) => eprintln!("bridge: bad telemetry JSON: {e}; payload={text}"),
+                },
+                Err(e) => eprintln!("bridge: non-text payload: {e}"),
             }
         }
     }

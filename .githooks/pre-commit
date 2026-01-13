@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Format Rust code before committing, and stage formatting changes.
+set -euo pipefail
+
+if command -v cargo >/dev/null 2>&1; then
+  echo "[pre-commit] cargo fmt --all"
+  cargo fmt --all
+  # Stage only files changed by formatting (Rust/TOML), if any.
+  changed=$(git diff --name-only -- '*.rs' '*.toml' || true)
+  if [ -n "$changed" ]; then
+    # Use null-delimited to handle spaces just in case
+    git diff --name-only -z -- '*.rs' '*.toml' | xargs -0 git add --
+    echo "[pre-commit] Staged formatted files"
+  fi
+else
+  echo "[pre-commit] cargo not found; skipping fmt" >&2
+fi
+
+exit 0

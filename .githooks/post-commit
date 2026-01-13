@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Optionally push current branch after a successful commit if upstream exists.
+# Disable by exporting HOOK_SKIP_PUSH=1 before committing.
+set -euo pipefail
+
+if [ "${HOOK_SKIP_PUSH:-0}" = "1" ]; then
+  exit 0
+fi
+
+if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  remote=$(git config --get branch."$branch".remote || echo origin)
+  echo "[post-commit] Pushing $branch to $remote"
+  git push "$remote" "$branch"
+fi

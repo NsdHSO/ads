@@ -84,25 +84,20 @@ impl JMessage {
 #[derive(Debug, Clone, PartialEq, Eq, DekuRead, DekuWrite)]
 #[deku(endian = "big")]
 pub struct J3_2AirTrack {
-    /// 16-bit track number
     #[deku(bytes = 2)]
     pub track: u16,
-    /// latitude scaled by 1e7 (degrees * 1e7)
     #[deku(bits = 19)]
-    pub latitude: u32, // Military scaled coordinate
+    pub latitude: u32,
     #[deku(bits = 19)]
-    pub longitude: u32, // Military scaled coordinate
+    pub longitude: u32,
     #[deku(bits = 12)]
-    pub track_number: u16, // Unique track ID
+    pub track_number: u16,
     #[deku(bits = 14)]
-    pub altitude: u16, // Scaled altitude
-    // The final 5 bits are for parity (calculated at runtime)
+    pub altitude: u16,
     #[deku(bits = 5)]
     pub parity: u8,
-    /// speed in m/s
     #[deku(bytes = 2)]
     pub speed_ms: u16,
-    /// heading in degrees * 100 (0..=35999)
     #[deku(bytes = 2)]
     pub heading_cdeg: u16,
 }
@@ -116,14 +111,12 @@ impl J3_2AirTrack {
         speed_ms: u16,
         heading_deg: u16,
     ) -> Self {
-        let alt_ft = alt_meters * 3.28084;
-
         Self {
             track,
             track_number: track & 0x0FFF,
-            latitude: ((lat_deg + 90.0) * LAT_SCALE).round() as u32,
-            longitude: ((lon_deg + 180.0) * LON_SCALE).round() as u32,
-            altitude: (alt_ft / ALT_STEP).round() as u16,
+            latitude: ((lat_deg + 90.0) * LAT_SCALE).round() as u32, // 19-bit squish
+            longitude: ((lon_deg + 180.0) * LON_SCALE).round() as u32, // 19-bit squish
+            altitude: (alt_meters * 3.28084 / ALT_STEP).round() as u16, // 14-bit squish
             parity: 0,
             speed_ms,
             heading_cdeg: heading_deg,
@@ -141,7 +134,7 @@ mod tests {
             42,
             45.1234567,
             -122.9876543,
-            1500.0,
+            1500.9,
             220,
             271,
         ));
