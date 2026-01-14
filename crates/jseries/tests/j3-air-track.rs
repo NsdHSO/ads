@@ -40,5 +40,4 @@ mod proofs {
         assert_eq!(v.speed_ms, speed_ms);
         assert_eq!(v.heading_cdeg, heading_deg);
     }
-
 }
