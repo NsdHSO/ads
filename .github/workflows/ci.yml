@@ -35,3 +35,9 @@ jobs:
   sbom:
     needs: [build]
     uses: ./.github/workflows/sbom.yml
+
+  kani:
+    needs: build
+    uses: ./.github/workflows/kani.yml
+    with:
+      toolchain: stable
