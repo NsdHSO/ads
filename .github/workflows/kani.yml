@@ -26,5 +26,5 @@ jobs:
         with:
           kani-version: latest
 
-      - name: Run Kani across workspace
-        run: cargo kani --workspace --output-format=terse
+      - name: Run Kani across workspace (incl. integration tests)
+        run: cargo kani --workspace --tests --output-format=terse
