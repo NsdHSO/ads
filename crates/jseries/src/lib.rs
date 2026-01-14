@@ -126,11 +126,7 @@ impl fmt::Display for J3_2AirTrack {
         write!(
             f,
             "Track #{}: [Lat: {}, Lon: {}] Speed: {}m/s, Alt: {}ft",
-            self.track_number,
-            self.latitude,
-            self.longitude,
-            self.speed_ms,
-            self.altitude
+            self.track_number, self.latitude, self.longitude, self.speed_ms, self.altitude
         )
     }
 }
