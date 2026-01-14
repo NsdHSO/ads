@@ -1,0 +1,30 @@
+name: Kani
+
+on:
+  workflow_call:
+    inputs:
+      toolchain:
+        type: string
+        default: stable
+
+jobs:
+  kani:
+    name: Verify with Kani
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ inputs.toolchain }}
+
+      - name: Set up Kani
+        uses: model-checking/kani-github-action@v1
+        with:
+          kani-version: latest
+
+      - name: Run Kani across workspace (incl. integration tests)
+        run: cargo kani --workspace --tests --output-format=terse

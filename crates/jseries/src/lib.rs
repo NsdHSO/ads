@@ -40,12 +40,9 @@ pub enum JMessage {
 }
 
 impl fmt::Display for JMessage {
-    fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            JMessage::J3_2(e) => {
-                println!("{} , {    }", e.altitude, e.track);
-                Ok(())
-            }
+            JMessage::J3_2(track) => write!(f, "J3.2 Message: {}", track),
         }
     }
 }
@@ -121,6 +118,16 @@ impl J3_2AirTrack {
             speed_ms,
             heading_cdeg: heading_deg,
         }
+    }
+}
+
+impl fmt::Display for J3_2AirTrack {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Track #{}: [Lat: {}, Lon: {}] Speed: {}m/s, Alt: {}ft",
+            self.track_number, self.latitude, self.longitude, self.speed_ms, self.altitude
+        )
     }
 }
 
