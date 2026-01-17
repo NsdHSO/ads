@@ -16,8 +16,8 @@ pub enum Error {
     Deku(String),
 }
 
-impl From<deku::error::DekuError> for Error {
-    fn from(e: deku::error::DekuError) -> Self {
+impl From<DekuError> for Error {
+    fn from(e: DekuError) -> Self {
         Self::Deku(e.to_string())
     }
 }
